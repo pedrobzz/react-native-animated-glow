@@ -1,226 +1,194 @@
-# React Native Animated Glow v3.0.1
+# React Native Animated Glow v4
 
 <div align="center">
 
 [![NPM Version](https://img.shields.io/npm/v/react-native-animated-glow.svg)](https://www.npmjs.com/package/react-native-animated-glow)
 [![NPM License](https://img.shields.io/npm/l/react-native-animated-glow.svg)](https://github.com/realimposter/react-native-animated-glow/blob/main/LICENSE)
 [![NPM Downloads](https://img.shields.io/npm/dt/react-native-animated-glow.svg)](https://www.npmjs.com/package/react-native-animated-glow)
-<br/>
-<a href="https://github.com/realimposter/react-native-animated-glow">
-  <img src="https://img.shields.io/github/stars/realimposter/react-native-animated-glow?style=social" alt="GitHub stars">
-</a>
 
 </div>
 
-A performant, highly-customizable animated glow effect component for React Native, powered by **Skia** and **Reanimated 3**.
+A performant animated glow effect for React Native, powered by **Skia** and **Reanimated 4**.
+
+`react-native-animated-glow` v4 targets the Expo 55 consumer baseline:
+
+- React Native `0.83.x`
+- React `19.2`
+- `@shopify/react-native-skia` `2.4.x`
+- `react-native-reanimated` `4.2.x`
+- `react-native-worklets` `0.7.x`
+
+v4 is **New Architecture only**. iOS and Android are the primary supported platforms. Web remains **experimental**.
 
 ![React Native Animated Glow Demo](https://raw.githubusercontent.com/realimposter/react-native-animated-glow/main/assets/react-native-glow-demo.gif)
 
-## Live Demo & Builder
-
-Check out the **[live web demo and interactive builder](https://reactnativeglow.com/)** to see the component in action, browse tutorials, and create your own presets.
-
-## Features
-
--   **GPU-Powered Performance:** Built with Skia for smooth, 60 FPS animations that run on the UI thread.
--   **Intelligent State Blending:** Responds to `hover` and `press` events by smoothly interpolating between different glow configurations.
--   **Highly Customizable:** Control colors, speed, shape, size, opacity, and more through a flexible `glowLayers` API.
--   **Advanced Effects:**
-    -   Create flowing **gradient glows and borders**.
-    -   Render glows `behind`, `inside` (clipped), or `over` your component.
-    -   Achieve "comet trail" effects with variable `glowSize` arrays.
--   **Easy Web Setup:** Skia's CanvasKit WASM file is loaded automatically from a CDN, no extra configuration needed.
--   **Presets Included:** Ships with professionally designed presets to get you started instantly.
-
 ## Installation
 
-**1. Install the library:**
+### Expo 55
+
+Install the package in your Expo app:
 
 ```bash
 npm install react-native-animated-glow
+npx expo install @shopify/react-native-skia react-native-reanimated react-native-worklets
 ```
 
-**2. Install Peer Dependencies:**
+Expo configures the Worklets Babel plugin for you.
 
-The library depends on Skia, Reanimated, and Gesture Handler.
+### Bare React Native / Community CLI
+
+Install the package and its peer dependencies:
 
 ```bash
-npm install @shopify/react-native-skia react-native-reanimated react-native-gesture-handler
+npm install react-native-animated-glow @shopify/react-native-skia react-native-reanimated react-native-worklets
 ```
 
-**3. Configure Dependencies:**
+Add the Worklets Babel plugin and keep it last:
 
-You must follow the installation guides for the peer dependencies to ensure they are configured correctly for your project.
-- [React Native Skia Docs](https://shopify.github.io/react-native-skia/docs/getting-started/installation)
-- [Reanimated Docs](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/#installation) (Remember to add the Babel plugin!)
-- [Gesture Handler Docs](https://docs.swmansion.com/react-native-gesture-handler/docs/fundamentals/installation) (Remember to add `GestureHandlerRootView`!)
+```js
+module.exports = {
+  presets: ['module:@react-native/babel-preset'],
+  plugins: [
+    'react-native-worklets/plugin',
+  ],
+};
+```
+
+Then follow the native installation steps from:
+
+- [React Native Skia docs](https://shopify.github.io/react-native-skia/docs/getting-started/installation)
+- [Reanimated docs](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/)
+- [React Native Worklets docs](https://docs.swmansion.com/react-native-worklets/docs/)
 
 ## Usage
 
-The best way to use the component is with a `PresetConfig` object, which makes your styles reusable and type-safe.
+The recommended API is a `PresetConfig` with a `states` array.
 
-```jsx
+```tsx
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import AnimatedGlow, { type PresetConfig } from 'react-native-animated-glow';
 
-// 1. Define your preset
-const myCoolPreset: PresetConfig = {
-  metadata: { 
-    name: 'My Cool Preset', 
-    textColor: '#FFFFFF', 
+const preset: PresetConfig = {
+  metadata: {
+    name: 'CTA',
+    textColor: '#FFFFFF',
     category: 'Custom',
-    tags: ['interactive']
+    tags: ['interactive'],
   },
   states: [
     {
-      name: 'default', // The base style for the component
+      name: 'default',
       preset: {
-        cornerRadius: 50,
+        cornerRadius: 28,
         outlineWidth: 2,
-        borderColor: '#E0FFFF',
+        borderColor: ['#FFF275', '#5EF38C', '#60A5FA', '#F472B6'],
+        backgroundColor: '#111111',
         glowLayers: [
-          { colors: ['#00BFFF', '#87CEEB'], opacity: 0.5, glowSize: 30 },
-        ]
-      }
+          {
+            glowPlacement: 'behind',
+            colors: ['#FFF275', '#5EF38C', '#60A5FA', '#F472B6'],
+            glowSize: 24,
+            opacity: 0.28,
+            speedMultiplier: 1,
+            coverage: 1,
+          },
+        ],
+      },
     },
-    // 2. Define interactive states
-    { 
-      name: 'hover', 
-      transition: 300, // 300ms transition into this state
-      preset: { 
-        glowLayers: [{ glowSize: 40 }] // On hover, make the glow bigger
-      } 
+    {
+      name: 'hover',
+      transition: 240,
+      preset: {
+        glowLayers: [{ glowSize: 30, opacity: 0.34 }],
+      },
     },
-    { 
-      name: 'press', 
-      transition: 100, // A faster transition for press
-      preset: { 
-        glowLayers: [{ glowSize: 45, opacity: 0.6 }] 
-      } 
-    }
-  ]
+    {
+      name: 'press',
+      transition: 120,
+      preset: {
+        glowLayers: [{ glowSize: 34, opacity: 0.4 }],
+      },
+    },
+  ],
 };
 
-// 3. Use it in your component
-export default function MyGlowingComponent() {
+export function Example() {
   return (
-    <AnimatedGlow preset={myCoolPreset}>
-      <View style={styles.box}>
-        <Text style={styles.text}>I'm Interactive!</Text>
+    <AnimatedGlow preset={preset}>
+      <View style={styles.button}>
+        <Text style={styles.text}>Press me</Text>
       </View>
     </AnimatedGlow>
   );
 }
 
 const styles = StyleSheet.create({
-  box: { paddingVertical: 20, paddingHorizontal: 40, backgroundColor: '#222' },
-  text: { color: 'white', fontWeight: 'bold' }
+  button: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    backgroundColor: '#111111',
+  },
+  text: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
 });
 ```
 
-## Controlling States
+## Controlled States
 
-The `AnimatedGlow` component is stateless by default and is controlled via the `activeState` prop. This gives you complete control to connect it to any gesture or state management system.
+`AnimatedGlow` is controlled via `activeState`. Pair it with a `Pressable` if you want to drive `default`, `hover`, and `press` explicitly.
 
-The recommended way to handle user interactions is to wrap your content in a `Pressable` and use `React.useState` and `React.useRef` to manage the component's state between `'default'`, `'hover'`, and `'press'`.
-
-Here is a robust example demonstrating how to handle both press and hover events correctly:
-
-```jsx
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-// Import the GlowEvent type for type safety
+```tsx
+import React, { useRef, useState } from 'react';
+import { Pressable, Text } from 'react-native';
 import AnimatedGlow, { glowPresets, type GlowEvent } from 'react-native-animated-glow';
 
-export default function MyInteractiveButton() {
-  // 1. State for the active glow effect ('default', 'hover', 'press')
-  const [glowState, setGlowState] = useState<GlowEvent>('default');
-  // 2. Ref to track if the cursor is currently hovering over the element
+export function InteractiveExample() {
+  const [state, setState] = useState<GlowEvent>('default');
   const isHovered = useRef(false);
 
   return (
-    <AnimatedGlow 
-      preset={glowPresets.defaultRainbow}
-      // 3. Pass the state to the activeState prop to control the glow
-      activeState={glowState}
-    >
+    <AnimatedGlow preset={glowPresets.defaultRainbow} activeState={state}>
       <Pressable
-        style={styles.button}
-        onPress={() => console.log('Button Pressed!')}
-        
-        // --- Press Events ---
-        onPressIn={() => setGlowState('press')}
-        onPressOut={() => {
-          // When the press is released, transition to 'hover' if the cursor
-          // is still over the button, otherwise return to 'default'.
-          setGlowState(isHovered.current ? 'hover' : 'default');
-        }}
-        
-        // --- Hover Events (for Web, macOS, Windows) ---
+        onPressIn={() => setState('press')}
+        onPressOut={() => setState(isHovered.current ? 'hover' : 'default')}
         onHoverIn={() => {
           isHovered.current = true;
-          // Only transition to hover state if not being actively pressed.
-          if (glowState !== 'press') {
-            setGlowState('hover');
+          if (state !== 'press') {
+            setState('hover');
           }
         }}
         onHoverOut={() => {
           isHovered.current = false;
-          // Only transition to default state if not being actively pressed.
-          if (glowState !== 'press') {
-            setGlowState('default');
+          if (state !== 'press') {
+            setState('default');
           }
         }}
       >
-        <Text style={styles.buttonText}>Tap or Hover Me</Text>
+        <Text>Tap or hover me</Text>
       </Pressable>
     </AnimatedGlow>
   );
 }
-
-const styles = StyleSheet.create({
-  button: { 
-    paddingVertical: 20, 
-    paddingHorizontal: 40,
-    backgroundColor: '#222'
-  },
-  buttonText: { 
-    color: 'white', 
-    fontWeight: 'bold', 
-    textAlign: 'center'
-  }
-});
 ```
 
-## API Reference
+## Web
 
-For a complete list of all available props and their descriptions, please see the **[Docs Tab](https://reactnativeglow.com/docs)** in the live demo app.
+Web support is experimental and not part of the v4 release gate. If you need web, make sure your app also follows the current Skia web installation guidance for CanvasKit.
 
-## Changelog
+## Migration from v3
 
-### `v3.0.1`
--   Added `activeState` prop.
--   Removed insternal state management
+v4 is an intentional major break.
 
-### `v3.0.0` (Breaking Changes)
-This version introduces a more powerful and intelligent animation system along with a complete restructuring of the preset API for better organization and type safety.
+- The package now targets the Expo 55 / React Native `0.83` stack.
+- The package requires `react-native-worklets` alongside Reanimated 4.
+- The package is New Architecture only.
+- `react-native-gesture-handler` is no longer part of the package install contract.
 
--   **New Feature: Intelligent Animation Blending:** A new animation system powered by Reanimated worklets smoothly interpolates *between* state configurations. When you hover, press, or return to default, every animatable property (colors, sizes, opacity, etc.) will transition gracefully over the specified duration.
--   **New Feature: Reworked State Management API:** The `preset` prop now expects a `PresetConfig` object with a `states` array. All visual styles, including the `default` look, are defined within this array. This makes presets more organized and powerful.
--   **Architectural Improvement:** All glow layers, placements (`behind`, `inside`, `over`), and the animated border are now rendered in a single, unified Skia shader for maximum efficiency.
--   **BREAKING CHANGE:** The `preset` prop format has been completely overhauled. Old flat preset objects are incompatible and must be migrated to the new `PresetConfig` structure, which includes a `metadata` object and a `states` array.
--   **BREAKING CHANGE:** The `randomness` prop has been removed from the core API.
-
-### `v2.0.0`
-This version marked a complete architectural rewrite for maximum performance and flexibility.
-
--   **Complete Rewrite with Skia:** The library is now powered by **Skia** and **Reanimated 3**, running animations smoothly on the UI thread.
--   **Interactive States:** Added support for `hover` and `press` events with configurable transitions using `react-native-gesture-handler`.
--   **BREAKING CHANGE:** The library now requires `@shopify/react-native-skia`, `react-native-reanimated`, and `react-native-gesture-handler` as peer dependencies. The old props (`glowColor`, `glowSize`, etc.) have been replaced by the `glowLayers` API.
-
-### `v1.0.0`
--   Initial release using glow particles and reanimated
+If you need the older dependency line, stay on v3.
 
 ## License
-This project is licensed under the MIT License.
+
+MIT

@@ -92,3 +92,6 @@ temp.js*
 .env
 .env.local
 .env.*.local
+
+# ignore docs
+/docs
