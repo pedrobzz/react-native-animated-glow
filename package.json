@@ -27,6 +27,7 @@
   },
   "scripts": {
     "build": "bob build",
+    "prepare": "bob build",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
